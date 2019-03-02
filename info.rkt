@@ -6,3 +6,7 @@
   '("base"
     "fancy-app"
     ))
+
+(define build-deps
+  '("rackunit-lib"
+    ))
