@@ -4,4 +4,5 @@
 
 (define deps
   '("base"
+    "fancy-app"
     ))
