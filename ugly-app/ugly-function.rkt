@@ -107,15 +107,21 @@
              ...)
            (define parser
              (ugly-name-piece
-              (...
-               (syntax-parser
-                 #:track-literals
-                 [{~and :at-least-one-placeholder ~!
-                        args:arguments/placeholders}
-                  #:with {~var b combined-class} #'(args.argument ...)
-                  #'(λ (args.parameter ...) b.output)]
-                 [{~var || combined-class}
-                  (attribute output)]))))
+              (lambda (stx)
+                (...
+                 (syntax-parse stx
+                   #:track-literals
+                   [{~and :at-least-one-placeholder ~!
+                          args:arguments/placeholders}
+                    #:with {~var b combined-class} #'(args.argument ...)
+                    (syntax-property
+                     #'(λ (args.parameter ...) b.output)
+                     mouse-over-tooltips
+                     (partial-application-tooltips
+                      stx
+                      (attribute args.placeholder)))]
+                   [{~var || combined-class}
+                    (attribute output)])))))
            (values parser* ...))))])
 
 (define-syntax-parser define-ugly-macro

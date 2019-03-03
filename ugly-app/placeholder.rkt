@@ -51,10 +51,12 @@
 
   (define-syntax-class argument/placeholder
     [pattern blank:placeholder
+      #:with [placeholder ...] #'[blank]
       #:with tmp (generate-temporary #'blank)
       #:with [parameter ...] #'[tmp]
       #:with argument #'tmp]
     [pattern argument
+      #:with [placeholder ...] '()
       #:with [parameter ...] '()])
 
   (define-syntax-class at-least-one-placeholder
@@ -62,6 +64,7 @@
 
   (define-syntax-class arguments/placeholders
     [pattern (arg:argument/placeholder ...)
+      #:with [placeholder ...] #'[arg.placeholder ... ...]
       #:with [parameter ...] #'[arg.parameter ... ...]
       #:with [argument ...] #'[arg.argument ...]])
   )
