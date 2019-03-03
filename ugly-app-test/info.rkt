@@ -4,7 +4,7 @@
 
 (define deps
   '("base"
-    "fancy-app"
+    "ugly-app"
     ))
 
 (define build-deps
