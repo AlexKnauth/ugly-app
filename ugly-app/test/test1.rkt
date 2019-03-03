@@ -37,9 +37,10 @@
   (check-equal? (1 + 2 + 3 + 4 + 5) 15)
   (check-equal? (map (1 + _) (list 1 2 3 4)) (list 2 3 4 5))
   (check-equal? (map (1 + _ + 3) (list 1 2 3 4)) (list 5 6 7 8))
-  (check-equal? (map (#%app _ - 1) (list 1 2 3 4)) (list 0 1 2 3))
+  (check-equal? (map (_ - 1) (list 1 2 3 4)) (list 0 1 2 3))
   (check-equal? (map (2 * _) (list 1 2 3 4)) (list 2 4 6 8))
   (check-equal? (map (2 ^ _) (list 1 2 3 4)) (list 2 4 8 16))
+  (check-equal? (map (_ ^ 2) (list 1 2 3 4)) (list 1 4 9 16))
   (check-equal? (map (- _) (list 1 2 3 4)) (list -1 -2 -3 -4))
 
   (define (fact n)

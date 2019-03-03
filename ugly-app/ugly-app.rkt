@@ -1,6 +1,6 @@
 #lang racket/base
 
-(provide #%app)
+(provide #%app _)
 
 (require (only-in racket/base [#%app app])
          "placeholder.rkt"
