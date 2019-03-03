@@ -31,7 +31,8 @@
     (usage-pattern-ops (λ (x els) (wrap-ellipses list x els))
                        (λ (x els) (wrap-ellipses list x els))))
 
-  (define-syntax-class (usage-pattern-item1 name-parts ops)
+  (define-syntax-class
+    (usage-pattern-item1 name-parts name-part-class ops)
     #:attributes [[part 1] [parameter 1] [argument 1] stxparse-pattern]
     [pattern x:id
       #:when (member #'x name-parts free-identifier=?)
@@ -41,22 +42,26 @@
       #:with [[parameter argument] ...] '()]
     [pattern {~and x:id {~not {~literal ...}}}
       #:when (not (member #'x name-parts free-identifier=?))
-      #:with stxparse-pattern #'{~var x}
+      #:with stxparse-pattern #`{~and {~var x}
+                                      {~not {~var _ #,name-part-class}}}
       #:with [part ...] '()
       #:with [[parameter argument] ...] #'[[x x]]]
     [pattern ({~and seq {~literal ~seq}} i ...)
-      #:declare i (usage-pattern-item name-parts ops)
+      #:declare i (usage-pattern-item name-parts name-part-class ops)
       #:with stxparse-pattern #'(seq i.stxparse-pattern ...)
       #:with [part ...] #'[i.part ... ...]
       #:with [parameter ...] #'[i.parameter ... ...]
       #:with [argument ...] #'[i.argument ... ...]])
 
-  (define-splicing-syntax-class (usage-pattern-item name-parts ops)
+  (define-splicing-syntax-class
+    (usage-pattern-item name-parts name-part-class ops)
     #:attributes [[part 1] [parameter 1] [argument 1] stxparse-pattern]
-    [pattern {~seq {~var || (usage-pattern-item1 name-parts ops)}}]
-    [pattern {~seq {~var i1 (usage-pattern-item1 name-parts ops)}
-                   {~and ooo {~literal ...}}
-                   ...+}
+    [pattern {~seq
+              {~var || (usage-pattern-item1 name-parts name-part-class ops)}}]
+    [pattern {~seq
+              {~var i1 (usage-pattern-item1 name-parts name-part-class ops)}
+              {~and ooo {~literal ...}}
+              ...+}
       #:with stxparse-pattern #'{~seq i1.stxparse-pattern ooo ...}
       #:with [part ...] #'[i1.part ...]
       #:with [parameter ...]
@@ -67,10 +72,11 @@
         ((usage-pattern-ops-argument-ellipses ops) x (attribute ooo)))]
     )
 
-  (define-syntax-class (usage-pattern name-parts ops)
+  (define-syntax-class
+    (usage-pattern name-parts name-part-class ops)
     #:attributes [parameters class-id class-def]
     [pattern (pat ...)
-      #:declare pat (usage-pattern-item name-parts ops)
+      #:declare pat (usage-pattern-item name-parts name-part-class ops)
       #:with parameters #'(pat.parameter ... ...)
       #:with parts-id (id-join #'(pat.part ... ...) #'-)
       #:with internal-id (generate-temporary #'parts-id)
@@ -82,23 +88,32 @@
             #:with output
             (with-syntax ([internal-id internal-id])
               #'(internal-id pat.argument ... ...))])])
+
+  (define-splicing-syntax-class name-parts
+    [pattern {~seq part:id ...}
+      #:with class-id (generate-temporary 'name-part)
+      #:with class-def
+      #'(define-syntax-class class-id
+          [pattern {~or {~literal part} ...}])])
   )
 
 
 
 (define-syntax-parser define-ugly-function
-  [(_ name-part:id ... [usage-pattern body:expr ...+] ...)
-   #:declare usage-pattern (usage-pattern (attribute name-part) ops:function)
+  [(_ name:name-parts [usage-pattern body:expr ...+] ...)
+   #:declare usage-pattern
+   (usage-pattern (attribute name.part) (attribute name.class-id) ops:function)
    #:with [internal-id ...] (generate-temporaries
                              (attribute usage-pattern.class-id))
    #:with parser (generate-temporary 'parser)
-   #:with [[parser* _] ...] #'[[parser name-part] ...]
+   #:with [[parser* _] ...] #'[[parser name.part] ...]
    #'(begin
        (define (internal-id . usage-pattern.parameters)
          body ...)
        ...
-       (define-syntaxes [name-part ...]
+       (define-syntaxes [name.part ...]
          (let ()
+           name.class-def
            usage-pattern.class-def ...
            (define-syntax-class combined-class
              #:attributes [output]
@@ -125,18 +140,20 @@
            (values parser* ...))))])
 
 (define-syntax-parser define-ugly-macro
-  [(_ name-part:id ... [usage-pattern body ...] ...)
-   #:declare usage-pattern (usage-pattern (attribute name-part) ops:macro)
+  [(_ name:name-parts [usage-pattern body ...] ...)
+   #:declare usage-pattern
+   (usage-pattern (attribute name.part) (attribute name.class-id) ops:macro)
    #:with [internal-id ...] (generate-temporaries
                              (attribute usage-pattern.class-id))
    #:with parser (generate-temporary 'parser)
-   #:with [[parser* _] ...] #'[[parser name-part] ...]
+   #:with [[parser* _] ...] #'[[parser name.part] ...]
    #'(begin
        (define-simple-macro (internal-id . usage-pattern.parameters)
          body ...)
        ...
-       (define-syntaxes [name-part ...]
+       (define-syntaxes [name.part ...]
          (let ()
+           name.class-def
            usage-pattern.class-def ...
            (define-syntax-class combined-class
              #:attributes [output]
