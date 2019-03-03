@@ -6,6 +6,7 @@
 
 (require syntax/parse/define
          "ugly-app.rkt"
+         "placeholder.rkt"
          (for-syntax racket/base
                      racket/syntax
                      "ugly-name.rkt"
@@ -99,13 +100,22 @@
        (define-syntaxes [name-part ...]
          (let ()
            usage-pattern.class-def ...
+           (define-syntax-class combined-class
+             #:attributes [output]
+             [pattern {~var || (usage-pattern.class-id
+                                (quote-syntax internal-id))}]
+             ...)
            (define parser
              (ugly-name-piece
-              (syntax-parser
-                #:track-literals
-                [{~var || (usage-pattern.class-id (quote-syntax internal-id))}
-                 (attribute output)]
-                ...)))
+              (...
+               (syntax-parser
+                 #:track-literals
+                 [{~and :at-least-one-placeholder ~!
+                        args:arguments/placeholders}
+                  #:with {~var b combined-class} #'(args.argument ...)
+                  #'(λ (args.parameter ...) b.output)]
+                 [{~var || combined-class}
+                  (attribute output)]))))
            (values parser* ...))))])
 
 (define-syntax-parser define-ugly-macro
@@ -122,12 +132,15 @@
        (define-syntaxes [name-part ...]
          (let ()
            usage-pattern.class-def ...
+           (define-syntax-class combined-class
+             #:attributes [output]
+             [pattern {~var || (usage-pattern.class-id
+                                (quote-syntax internal-id))}]
+             ...)
            (define parser
              (ugly-name-piece
               (syntax-parser
                 #:track-literals
-                [{~var || (usage-pattern.class-id (quote-syntax internal-id))}
-                 (attribute output)]
-                ...)))
+                [{~var || combined-class} (attribute output)])))
            (values parser* ...))))])
 
