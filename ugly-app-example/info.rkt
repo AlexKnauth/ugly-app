@@ -3,5 +3,10 @@
 (define collection 'multi)
 
 (define deps
-  '("icfp2017-minikanren"
+  '("ugly-app-lib"
+    "icfp2017-minikanren"
+    ))
+
+(define build-deps
+  '("rackunit-lib"
     ))

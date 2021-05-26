@@ -4,7 +4,8 @@
 
 (define deps
   '("base"
-    "ugly-app"
+    "ugly-app-lib"
+    "ugly-app-example"
     ))
 
 (define build-deps

@@ -8,6 +8,6 @@ This was mainly inspired by two things:
 
 ## Installation
 
-In DrRacket, go to the `File` menu, click `Package Manager`, and click on the `Do What I Mean` tab. In the `Package Source` field put `git://github.com/AlexKnauth/ugly-app?path=ugly-app`, and click Install.
+In DrRacket, go to the `File` menu, click `Package Manager`, and click on the `Do What I Mean` tab. In the `Package Source` field put `git://github.com/AlexKnauth/ugly-app?path=ugly-app-lib`, and click Install.
 
-Or on the command line, run the command `raco pkg install git://github.com/AlexKnauth/ugly-app?path=ugly-app`.
+Or on the command line, run the command `raco pkg install git://github.com/AlexKnauth/ugly-app?path=ugly-app-lib`.

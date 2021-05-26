@@ -4,5 +4,19 @@
 
 (define deps
   '("base"
-    "fancy-app"
+    "ugly-app-lib"
+    "ugly-app-example"
+    "ugly-app-test"
+    ))
+
+(define implies
+  '("ugly-app-lib"
+    "ugly-app-example"
+    "ugly-app-test"
+    ))
+
+(define update-implies
+  '("ugly-app-lib"
+    "ugly-app-example"
+    "ugly-app-test"
     ))
